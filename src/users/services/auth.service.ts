@@ -20,7 +20,7 @@ export class AuthService {
     private userRepo: UserRepository,
     private tokenRepo: TokenRepository,
     private jwtService: JwtService,
-    private mailerSerivce: MailerService,
+    private mailerService: MailerService,
   ) {}
 
   async signUp(body: SignUpDto) {
@@ -102,7 +102,7 @@ export class AuthService {
     }
     if (isExpire(tokenDb.expireAt)) {
       await tokenDb.remove();
-      throw new BadRequestException('Token is exprired');
+      throw new BadRequestException('Token is expired');
     }
     const { accessToken, refreshToken, expireAt } = await this.generateTokens(
       tokenDb.user,
@@ -122,7 +122,7 @@ export class AuthService {
       relations: ['user'],
     });
     if (!token || isExpire(token.expireAt) || token.user.isVerified) {
-      throw new BadRequestException('Token is invalid or exprired');
+      throw new BadRequestException('Token is invalid or expired');
     }
     await this.userRepo.update({ id: token.userId }, { isVerified: true });
     await token.remove();
@@ -149,6 +149,6 @@ export class AuthService {
       context: { firstName, verifyLink },
       to,
     };
-    return this.mailerSerivce.sendMail(options);
+    return this.mailerService.sendMail(options);
   }
 }

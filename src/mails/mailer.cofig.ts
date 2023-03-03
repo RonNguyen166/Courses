@@ -3,9 +3,10 @@ import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
 import { env } from '../config/env.config';
 import * as path from 'path';
 
-const smtpCofig = {
+const smtpConfig = {
   host: env.SMTP.HOST,
   port: env.SMTP.PORT,
+  secure: true,
   auth: {
     user: env.SMTP.USERNAME,
     pass: env.SMTP.PASSWORD,
@@ -19,6 +20,6 @@ export const MailerConfig = MailerModule.forRoot({
       strict: true,
     },
   },
-  transport: smtpCofig,
+  transport: smtpConfig,
   defaults: { from: env.SMTP.FROM },
 });
