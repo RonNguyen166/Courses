@@ -11,8 +11,9 @@ import { env } from '../../config/env.config';
 import { UserEntity } from '../entities/user.entity';
 import { TokenRepository } from '../repositories/token.repository';
 import { LoginDto } from '../dto/login.dto';
-import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
-import { isExpire } from 'src/helpers/time.helper';
+import { isExpired } from 'src/helpers/time.helper';
+import { VerifyEmail } from '../mails/verify.email';
+import { BullQueueService } from '../../mails/services/bull-queue.service';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,7 @@ export class AuthService {
     private userRepo: UserRepository,
     private tokenRepo: TokenRepository,
     private jwtService: JwtService,
-    private mailerService: MailerService,
+    private bullQueueService: BullQueueService,
   ) {}
 
   async signUp(body: SignUpDto) {
@@ -42,7 +43,8 @@ export class AuthService {
     });
 
     const verifyLink = `${env.WEB_URL}/verify-email?token=${token}`;
-    await this.sendVerifyEmail(user.email, user.firstName, verifyLink);
+
+    await this.sendVerifyEmail(user, verifyLink);
     delete user.password;
     return { sentVerifyEmail: !!user, user };
   }
@@ -84,7 +86,10 @@ export class AuthService {
   }
 
   async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.userRepo.findOne({ where: { email } });
+    const user = await this.userRepo.findOne({
+      where: { email },
+    });
+
     if (user && bcrypt.compareSync(pass, user.password)) {
       const { password, ...result } = user;
       return result;
@@ -100,7 +105,7 @@ export class AuthService {
     if (!token) {
       throw new BadRequestException('Token is invalid');
     }
-    if (isExpire(tokenDb.expireAt)) {
+    if (isExpired(tokenDb.expireAt)) {
       await tokenDb.remove();
       throw new BadRequestException('Token is expired');
     }
@@ -121,11 +126,20 @@ export class AuthService {
       where: { token: verifyToken },
       relations: ['user'],
     });
-    if (!token || isExpire(token.expireAt) || token.user.isVerified) {
+
+    if (!token || isExpired(token.expireAt) || token.user.isVerified) {
       throw new BadRequestException('Token is invalid or expired');
     }
     await this.userRepo.update({ id: token.userId }, { isVerified: true });
-    await token.remove();
+    return await token.remove();
+  }
+
+  async logout(token: string) {
+    const tokenDb = await this.tokenRepo.findOne({ token });
+    if (!tokenDb) {
+      throw new BadRequestException('Token is invalid or expired');
+    }
+    return tokenDb.remove();
   }
 
   async generateTokens(user: UserEntity) {
@@ -142,13 +156,7 @@ export class AuthService {
     return { accessToken, refreshToken, expireAt };
   }
 
-  sendVerifyEmail(to: string, firstName: string, verifyLink: string) {
-    const options: ISendMailOptions = {
-      subject: 'Verify your email address',
-      template: 'verify-email',
-      context: { firstName, verifyLink },
-      to,
-    };
-    return this.mailerService.sendMail(options);
+  sendVerifyEmail(user: UserEntity, verifyLink: string) {
+    return this.bullQueueService.addToQueue(new VerifyEmail(user, verifyLink));
   }
 }

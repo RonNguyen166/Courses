@@ -1,5 +1,5 @@
-import moment from 'moment';
+import * as moment from 'moment';
 
-export function isExpire(timestamp: number | Date) {
+export function isExpired(timestamp: number | Date) {
   return moment().unix() > timestamp;
 }

@@ -1,5 +1,12 @@
-import { BaseEntity } from 'src/core/entites/base.entity';
-import { Column, Entity, Index, OneToOne } from 'typeorm';
+import { BaseEntity } from 'src/core/entities/base.entity';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { UserEntity } from './user.entity';
 import { TimestampTransformer } from '../../core/transformers/timestamp.transformer';
 
@@ -15,6 +22,7 @@ export class TokenEntity extends BaseEntity {
   @Column('timestamp', { transformer: new TimestampTransformer() })
   expireAt: number | Date;
 
-  @OneToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, (user) => user.tokens)
+  @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }

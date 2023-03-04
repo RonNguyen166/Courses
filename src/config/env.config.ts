@@ -16,6 +16,12 @@ export const env = {
       expiresIn: process.env.JWT_EXPIRE_REFRESH,
     },
   },
+  REDIS: {
+    HOST: process.env.REDIS_HOST,
+    PORT: Number(process.env.REDIS_PORT || 6379),
+    USER: process.env.REDIS_USER,
+    PASS: process.env.REDIS_PASS,
+  },
   DATABASE_URL: process.env.DATABASE_URL,
   DATABASE: {
     CONNECT: process.env.DATABASE_CONNECT as any,

@@ -1,10 +1,14 @@
 import { AuthService } from '../services/auth.service';
 import { SignUpDto } from '../dto/sign-up.dto';
-import { Controller, Post, Body, HttpCode, Put } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Put, Delete } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { HttpStatus, UseGuards } from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
 import { VerifyTokenDto } from '../dto/verify-token.dto';
+import { RefreshTokenGuard } from '../guards/refresh-token.guard';
+import { Auth } from '../decorators/auth.decorator';
+import { CurrentUser } from '../decorators/user-current.decorator';
+import { TokenEntity } from '../entities/token.entity';
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -31,7 +35,15 @@ export class AuthController {
 
   @Post('refresh-tokens')
   @HttpCode(HttpStatus.OK)
-  refreshTokens(@Body() body: VerifyTokenDto) {
-    return this.authService.refreshTokens(body.token);
+  @Auth(RefreshTokenGuard)
+  refreshTokens(@CurrentUser('refreshToken') tokenEntity: TokenEntity) {
+    return this.authService.refreshTokens(tokenEntity.token);
+  }
+
+  @Delete('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Auth(RefreshTokenGuard)
+  logout(@CurrentUser('refreshToken') tokenEntity: TokenEntity) {
+    return this.authService.logout(tokenEntity.token);
   }
 }

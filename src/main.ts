@@ -15,6 +15,7 @@ async function bootstrap() {
     .setDescription('The courses API description')
     .setVersion('1.0')
     .addTag('courses')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(env.APP_PREFIX, app, document);

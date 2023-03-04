@@ -1,7 +1,9 @@
 import { Exclude } from 'class-transformer';
-import { BaseEntity } from 'src/core/entites/base.entity';
-import { Column, Entity, Index } from 'typeorm';
-import { RolesEnum } from '../enums/roles.enum';
+import { BaseEntity } from 'src/core/entities/base.entity';
+
+import { Column, Entity, Index, OneToMany, JoinColumn } from 'typeorm';
+import { RoleEnum } from '../enums/roles.enum';
+import { TokenEntity } from './token.entity';
 
 @Entity('User')
 export class UserEntity extends BaseEntity {
@@ -10,7 +12,7 @@ export class UserEntity extends BaseEntity {
   email: string;
 
   @Exclude()
-  @Column({ select: false })
+  @Column()
   password: string;
 
   @Column()
@@ -25,9 +27,15 @@ export class UserEntity extends BaseEntity {
   @Column({ default: false })
   isVerified: boolean;
 
-  @Column({ default: RolesEnum.USER })
-  role: RolesEnum;
+  @Column({ default: RoleEnum.USER })
+  role: RoleEnum;
 
   @Column({ nullable: true })
   avatar: string;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @OneToMany(() => TokenEntity, (token) => token.user)
+  tokens: TokenEntity[];
 }

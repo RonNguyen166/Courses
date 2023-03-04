@@ -1,6 +1,6 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
-import { env } from '../config/env.config';
+import { env } from '../../config/env.config';
 import * as path from 'path';
 
 const smtpConfig = {
@@ -12,7 +12,7 @@ const smtpConfig = {
     pass: env.SMTP.PASSWORD,
   },
 };
-export const MailerConfig = MailerModule.forRoot({
+export const mailerConfig = MailerModule.forRoot({
   template: {
     dir: path.join(env.ROOT_PATH, '/mails/templates/'),
     adapter: new PugAdapter(),

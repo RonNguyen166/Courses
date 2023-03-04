@@ -4,7 +4,7 @@ import { UserEntity } from '../entities/user.entity';
 import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(private userRepo: UserRepository) {}
 
   findOne(options: FindOneOptions<UserEntity>) {
