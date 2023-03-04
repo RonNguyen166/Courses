@@ -3,7 +3,7 @@ dotenv.config();
 
 export const env = {
   WEB_URL: process.env.WEB_URL,
-  APP_PORT: process.env.APP_PORT,
+  APP_PORT: process.env.APP_PORT || 3000,
   APP_ENV: process.env.APP_ENV,
   APP_PREFIX: process.env.APP_PREFIX || 'api',
   JWT: {
@@ -17,7 +17,7 @@ export const env = {
     },
   },
   REDIS: {
-    URL: process.env.URL,
+    URL: process.env.REDIS_URL,
     HOST: process.env.REDIS_HOST,
     PORT: Number(process.env.REDIS_PORT || 6379),
     USER: process.env.REDIS_USER,

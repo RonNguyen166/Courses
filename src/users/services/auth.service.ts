@@ -14,6 +14,9 @@ import { LoginDto } from '../dto/login.dto';
 import { isExpired } from 'src/helpers/time.helper';
 import { VerifyEmail } from '../mails/verify.email';
 import { BullQueueService } from '../../mails/services/bull-queue.service';
+import { ResetPasswordEmail } from '../mails/reset-password.email';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { ChangePasswordDto } from '../dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -46,7 +49,7 @@ export class AuthService {
 
     await this.sendVerifyEmail(user, verifyLink);
     delete user.password;
-    return { sentVerifyEmail: !!user, user };
+    return { isSentMail: !!user, user };
   }
 
   async createLoginResult(user: UserEntity) {
@@ -122,8 +125,9 @@ export class AuthService {
   }
 
   async verify(verifyToken: string) {
+    const userId = await (this.jwtService.decode(verifyToken) as any).id;
     const token = await this.tokenRepo.findOne({
-      where: { token: verifyToken },
+      where: { token: verifyToken, userId },
       relations: ['user'],
     });
 
@@ -134,12 +138,13 @@ export class AuthService {
     return await token.remove();
   }
 
-  async logout(token: string) {
-    const tokenDb = await this.tokenRepo.findOne({ token });
-    if (!tokenDb) {
+  async logout(refreshToken: string) {
+    const userId = await (this.jwtService.decode(refreshToken) as any).id;
+    const token = await this.tokenRepo.findOne({ token: refreshToken, userId });
+    if (!token) {
       throw new BadRequestException('Token is invalid or expired');
     }
-    return tokenDb.remove();
+    return token.remove();
   }
 
   async generateTokens(user: UserEntity) {
@@ -158,5 +163,48 @@ export class AuthService {
 
   sendVerifyEmail(user: UserEntity, verifyLink: string) {
     return this.bullQueueService.addToQueue(new VerifyEmail(user, verifyLink));
+  }
+
+  async forgotPass(email: string) {
+    const user = await this.userRepo.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Email address is not exist');
+    }
+    const token = await this.jwtService.signAsync(
+      { id: user.id, email: user.email },
+      { secret: env.JWT.ACCESS_TOKEN.secret, expiresIn: '1d' },
+    );
+
+    await this.tokenRepo.save({
+      token,
+      userId: user.id,
+      expireAt: await (this.jwtService.decode(token) as any).exp,
+    });
+
+    const resetLink = `${env.WEB_URL}/reset-password?token=${token}`;
+
+    await this.sendResetPass(user, resetLink);
+    delete user.password;
+    return { isSentMail: !!user, user };
+  }
+
+  async resetPass(body: ResetPasswordDto) {
+    const userId = await (this.jwtService.decode(body.token) as any).id;
+    const tokenDb = await this.tokenRepo.findOneOrFail({
+      where: { token: body.token, userId },
+    });
+    if (!tokenDb || isExpired(tokenDb.expireAt)) {
+      throw new BadRequestException('Token is invalid or expired');
+    }
+    await this.userRepo.update(
+      { id: userId },
+      { password: bcrypt.hashSync(body.password, 10) },
+    );
+  }
+
+  sendResetPass(user: UserEntity, resetLink: string) {
+    return this.bullQueueService.addToQueue(
+      new ResetPasswordEmail(user, resetLink),
+    );
   }
 }

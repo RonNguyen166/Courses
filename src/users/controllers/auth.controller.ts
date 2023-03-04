@@ -9,6 +9,10 @@ import { RefreshTokenGuard } from '../guards/refresh-token.guard';
 import { Auth } from '../decorators/auth.decorator';
 import { CurrentUser } from '../decorators/user-current.decorator';
 import { TokenEntity } from '../entities/token.entity';
+import { EmailDto } from '../dto/email.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { UserEntity } from '../entities/user.entity';
+import { ChangePasswordDto } from '../dto/change-password.dto';
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -45,5 +49,17 @@ export class AuthController {
   @Auth(RefreshTokenGuard)
   logout(@CurrentUser('refreshToken') tokenEntity: TokenEntity) {
     return this.authService.logout(tokenEntity.token);
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  forgotPass(@Body() body: EmailDto) {
+    return this.authService.forgotPass(body.email);
+  }
+
+  @Put('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  resetPass(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPass(body);
   }
 }
