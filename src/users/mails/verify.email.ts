@@ -7,7 +7,7 @@ export class VerifyEmail extends BaseMail {
   }
 
   get subject(): string {
-    return 'Reset your iom-grievance password';
+    return 'Verify your email address';
   }
 
   get template(): string {

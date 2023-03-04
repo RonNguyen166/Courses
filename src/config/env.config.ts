@@ -17,6 +17,7 @@ export const env = {
     },
   },
   REDIS: {
+    URL: process.env.URL,
     HOST: process.env.REDIS_HOST,
     PORT: Number(process.env.REDIS_PORT || 6379),
     USER: process.env.REDIS_USER,
