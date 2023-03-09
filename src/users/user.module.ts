@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './services/users.service';
-import { UsersController } from './controllers/users.controller';
+import { UserService } from './services/user.service';
+import { UserController } from './controllers/user.controller';
 import { AuthService } from './services/auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserRepository } from './repositories/user.repository';
@@ -16,7 +16,7 @@ import { JwtAccessTokenStrategy } from './strategies/jwt-access-token.strategy';
     TypeOrmModule.forFeature([UserRepository, TokenRepository]),
     BullQueueModule,
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UserController, AuthController],
   providers: [
     UserService,
     AuthService,

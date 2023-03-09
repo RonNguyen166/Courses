@@ -4,6 +4,7 @@ import { BaseEntity } from 'src/core/entities/base.entity';
 import { Column, Entity, Index, OneToMany, JoinColumn } from 'typeorm';
 import { RoleEnum } from '../enums/roles.enum';
 import { TokenEntity } from './token.entity';
+import { FileUploadEntity } from '../../file-upload/entities/file-upload.entity';
 
 @Entity('User')
 export class UserEntity extends BaseEntity {
@@ -17,6 +18,9 @@ export class UserEntity extends BaseEntity {
 
   @Column()
   lastName: string;
+
+  @Column({ nullable: true })
+  bio: string;
 
   @Column()
   firstName: string;
@@ -38,4 +42,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => TokenEntity, (token) => token.user)
   tokens: TokenEntity[];
+
+  @OneToMany(() => FileUploadEntity, (fileUpload) => fileUpload.user)
+  fileUploads: FileUploadEntity[];
 }

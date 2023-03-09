@@ -4,6 +4,7 @@ import { UserEntity } from '../entities/user.entity';
 import { UserRepository } from '../repositories/user.repository';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from '../dto/change-password.dto';
+import { EditProfileDto } from '../dto/edit-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -22,5 +23,9 @@ export class UserService {
       { id: userId },
       { password: bcrypt.hashSync(body.newPassword, 10) },
     );
+  }
+
+  editProfile(userId: string, body: EditProfileDto) {
+    return this.userRepo.update({ id: userId }, body);
   }
 }

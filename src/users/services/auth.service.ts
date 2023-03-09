@@ -16,7 +16,6 @@ import { VerifyEmail } from '../mails/verify.email';
 import { BullQueueService } from '../../mails/services/bull-queue.service';
 import { ResetPasswordEmail } from '../mails/reset-password.email';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
-import { ChangePasswordDto } from '../dto/change-password.dto';
 
 @Injectable()
 export class AuthService {

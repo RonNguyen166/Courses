@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
-import { UsersModule } from './users/users.module';
+import { UsersModule } from './users/user.module';
 import { databaseConfig } from './config/database.config';
 import { mailerConfig } from './mails/config/mailer.config';
 import { queueConfig } from './config/queue.config';
 import { BullQueueModule } from './mails/bull-queue.module';
-import { UsersController } from './users/controllers/users.controller';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -16,7 +16,8 @@ import { UsersController } from './users/controllers/users.controller';
     JwtModule,
     BullQueueModule,
     UsersModule,
+    FileUploadModule,
   ],
-  controllers: [AppController, UsersController],
+  controllers: [AppController],
 })
 export class AppModule {}

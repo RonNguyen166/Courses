@@ -41,4 +41,10 @@ export const env = {
     PASSWORD: process.env.SMTP_PASS,
     FROM: process.env.MAIL_SEND_FROM,
   },
+  AWS_S3: {
+    REGION: process.env.AWS_REGION,
+    ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    BUCKET_NAME: process.env.AWS_BUCKET_NAME,
+  },
 };
